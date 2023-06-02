@@ -29,7 +29,6 @@ void setup() {
   pinMode(ERROR_PIN, OUTPUT);
   pinMode(BUZZER_PIN, OUTPUT);
 
-  // Serial.println(F("READING THE CARD UNIQUE ID:"));
   for (byte i = 0; i < 6; i++) {
     key.keyByte[i] = 0xFF;
   }
@@ -63,8 +62,9 @@ void loop() {
   byte block = 4;
   byte len;
 
-  while(!Serial.available());
-  
+  while (!Serial.available())
+    ;
+
   String res = Serial.readString();
   res.trim();
   len = res.length();
@@ -73,16 +73,18 @@ void loop() {
   res.getBytes(buffr, 16);
 
   if (len >= 1) {
-    Serial.print("GOT[");
-    Serial.print(len);
-    Serial.print("]: |");
-    Serial.print(res);
-    Serial.println("|");
+    // Serial.print("GOT[");
+    // Serial.print(len);
+    // Serial.print("]: |");
+    // Serial.print(res);
+    // Serial.println("|");
 
     if (is_number(res)) {
       if (res.toInt() == ERROR) {
         Serial.println("FAILED");
         access_denied();
+      } else if (res.toInt() == SUCCESS) {
+        access_granted();
       }
     } else {
       String strs[2] = { "0", "0" };

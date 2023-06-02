@@ -61,7 +61,6 @@ def get_card_info() -> dict:
     while True:
         if ser.in_waiting > 0:
             line = ser.readline().decode("utf-8").rstrip()
-            print(line)
             if line[0:11] == "[card_data]":
                 """ 
                     The format of card_data is as follows
@@ -122,12 +121,21 @@ if __name__ == "__main__":
     print('WELCOME TO RFID-COMMERCE')
     print('========================')
     while True:
-        # Ask for total amount to remove from card
-        total = int(input('[input] What is the product total? '))
+        total = 0
+        # ask if user wants to add money to card
+        print("what would you like to do?\n\ta. deposit\n\tb. purchase\n\tc. check balance")
+        choice = input('-> ')
+        if choice not in ('a', 'b', 'c'):
+            print("[error] INVALID CHOICE")
+            continue
+        if choice == 'a':
+            total = int(input("[input] how much do you want to add on the card? ")) * -1
+        elif choice == 'b':
+            total = int(input('[input] What is the product total? '))
+            
         # Ask for card to be put on sensor
         print('[input] Please put card on sensor...')
         cardInfo = get_card_info()
-        print(cardInfo)
         if not cardInfo['success']:
             ser.write(f"{ERROR_CODE}".encode())
             break
@@ -135,9 +143,16 @@ if __name__ == "__main__":
         transaction_state = transaction(cardInfo, total)
         
         if transaction_state['success']:
-            print('[info] Transaction successful')
-            print(f"{transaction_state['newInfo']['money']};{transaction_state['newInfo']['points']};")
-            ser.write(f"{transaction_state['newInfo']['money']};{transaction_state['newInfo']['points']};".encode())
+            if choice == 'c':
+                print("[info] your current balance is ${0} and {1}points".format(
+                    transaction_state['newInfo']['money'],
+                    transaction_state['newInfo']['points']
+                ))
+                ser.write(f"{SUCCESS_CODE}".encode())
+            else:
+                print('[info] Transaction successful')
+                # print(f"{transaction_state['newInfo']['money']};{transaction_state['newInfo']['points']};")
+                ser.write(f"{transaction_state['newInfo']['money']};{transaction_state['newInfo']['points']};".encode())
         else:
             print('[info] Transaction unsuccessful')
             ser.write(f"{ERROR_CODE}".encode())
