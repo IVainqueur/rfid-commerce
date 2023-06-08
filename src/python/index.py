@@ -138,7 +138,7 @@ if __name__ == "__main__":
         cardInfo = get_card_info()
         if not cardInfo['success']:
             ser.write(f"{ERROR_CODE}".encode())
-            break
+            continue
         # carry out transaction
         transaction_state = transaction(cardInfo, total)
         
